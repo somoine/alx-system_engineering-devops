@@ -1,29 +1,39 @@
-#!/usr/bin/env bash
-# A Bash script that will display information about the subdomains
+#!/bin/bash
 
-# Check if at least one argument is provided
-if [ $# -lt 1 ]; then
-  echo "Usage: $0 domain [subdomain1 subdomain2 ...]"
+# Function to get the DNS record information
+get_record_info() {
+  local domain=$1
+  local subdomain=$2
+  local fqdn="$subdomain.$domain"
+  
+  # Get the DNS record using dig
+  dig_result=$(dig "$fqdn" +short)
+  
+  # Check if dig result is not empty
+  if [ -n "$dig_result" ]; then
+    record_type="A"
+    echo "The subdomain $subdomain is a $record_type record and points to $dig_result"
+  else
+    echo "The subdomain $subdomain does not have an A record."
+  fi
+}
+
+# Check if at least the domain is provided
+if [ -z "$1" ]; then
+  echo "Usage: $0 domain [subdomain]"
   exit 1
 fi
 
-# Set domain name
-domain="$1"
+domain=$1
+subdomain=$2
 
-# Set subdomains to query
-subdomains=("www" "lb-01" "web-01" "web-02")
-
-# If additional subdomains are provided as arguments, add them to the subdomains array
-if [ $# -gt 1 ]; then
-  subdomains+=("${@:2}")
+# If subdomain is provided, get info for that specific subdomain
+if [ -n "$subdomain" ]; then
+  get_record_info "$domain" "$subdomain"
+else
+  # If no subdomain is provided, get info for all specified subdomains
+  get_record_info "$domain" "www"
+  get_record_info "$domain" "lb-01"
+  get_record_info "$domain" "web-01"
+  get_record_info "$domain" "web-02"
 fi
-
-# Loop through subdomains and display information
-for subdomain in "${subdomains[@]}"; do
-  output=$(dig "$subdomain.$domain" +short)
-  if [ -n "$output" ]; then
-    echo "The subdomain $subdomain has IP address $output"
-  else
-    echo "The subdomain $subdomain does not exist"
-  fi
-done

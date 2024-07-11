@@ -1,39 +1,18 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# script that will display information about subdomains
 
-# Function to get the DNS record information
-get_record_info() {
-  local domain=$1
-  local subdomain=$2
-  local fqdn="$subdomain.$domain"
-  
-  # Get the DNS record using dig
-  dig_result=$(dig "$fqdn" +short)
-  
-  # Check if dig result is not empty
-  if [ -n "$dig_result" ]; then
-    record_type="A"
-    echo "The subdomain $subdomain is a $record_type record and points to $dig_result"
-  else
-    echo "The subdomain $subdomain does not have an A record."
-  fi
+domain_info () {
+    line=$(dig "$2"."$1" | grep -A1 'ANSWER SECTION:' | tr '\t' '\n' | tail -2 | tr '\n' ' ')
+    echo "$2 $line" | awk '{print "The subdomain " $1 " is a " $2 " record and points to " $3}'
 }
 
-# Check if at least the domain is provided
-if [ -z "$1" ]; then
-  echo "Usage: $0 domain [subdomain]"
-  exit 1
-fi
-
-domain=$1
-subdomain=$2
-
-# If subdomain is provided, get info for that specific subdomain
-if [ -n "$subdomain" ]; then
-  get_record_info "$domain" "$subdomain"
-else
-  # If no subdomain is provided, get info for all specified subdomains
-  get_record_info "$domain" "www"
-  get_record_info "$domain" "lb-01"
-  get_record_info "$domain" "web-01"
-  get_record_info "$domain" "web-02"
+if [ "$#" == 1 ]
+then
+    domain_info "$1" "www"
+    domain_info "$1" "lb-01"
+    domain_info "$1" "web-01"
+    domain_info "$1" "web-02"
+elif [ "$#" == 2 ]
+then
+    domain_info "$1" "$2"
 fi

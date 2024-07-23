@@ -1,18 +1,9 @@
 #!/usr/bin/env bash
+# This script runs the whoami command as the user passed as an argument
 
-# This script runs the whoami command as the user provided as an argument.
-
-if [ $# -ne 1 ]; then
-  echo "Error: Please provide exactly one username as an argument."
+if [ "$#" -ne 1 ]; then
+  echo "Usage: $0 <username>"
   exit 1
 fi
 
-# Use sudo to run whoami as the specified user
-sudo -n whoami --username="$1"
-
-# Check the exit code of sudo
-if [ $? -eq 0 ]; then
-  echo "Successfully ran whoami as $1."
-else
-  echo "Failed to run whoami as $1. Please check the username and permissions."
-fi
+sudo -u "$1" whoami

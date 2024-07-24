@@ -1,6 +1,0 @@
-#!/usr/bin/env bash
-# Restart the nginx service with superuser privileges
-
-sudo systemctl restart nginx
-
-

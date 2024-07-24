@@ -1,8 +1,21 @@
-#!/usr/bin/env bash
-# a script that sets up the firewall via ufw
+# Commands used to configure UFW firewall on web-01
+
+# Update package lists
+sudo apt update
+
+# Install UFW
+sudo apt install ufw
+
+# Set default policy to deny all incoming traffic
 sudo ufw default deny incoming
+
+# Allow incoming traffic on specific ports
 sudo ufw allow 22/tcp
 sudo ufw allow 443/tcp
 sudo ufw allow 80/tcp
-sudo ufw disable
+
+# Enable UFW
 sudo ufw enable
+
+# Verify the status of UFW
+sudo ufw status

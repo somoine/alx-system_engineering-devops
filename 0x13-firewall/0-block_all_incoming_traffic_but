@@ -1,14 +1,7 @@
-# Reset UFW
-sudo ufw reset
-
-# Set default policies
-sudo ufw default deny incoming
-sudo ufw default allow outgoing
-
-# Allow specific ports
-sudo ufw allow 22/tcp
-sudo ufw allow 443/tcp
-sudo ufw allow 80/tcp
-
-# Enable UFW
-sudo ufw enable
+#!/usr/bin/env bash
+ufw disable
+ufw default deny incoming
+ufw allow 22/tcp
+ufw allow 80/tcp
+ufw allow 443/tcp
+ufw enable

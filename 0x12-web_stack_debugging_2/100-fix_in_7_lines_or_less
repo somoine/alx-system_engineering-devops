@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Fixes the specific issue in task #1
+# Ensure Nginx runs as nginx user and listens on port 8080
 
 sudo service nginx stop
+sudo sed -i 's/^user .*/user nginx;/g' /etc/nginx/nginx.conf
+sudo sed -i 's/listen 80;/listen 8080;/g' /etc/nginx/sites-available/default
 sudo service nginx start
-
-# Add any other necessary commands here

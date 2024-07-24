@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Fixes the specific issue in task #1
 
-sudo chmod 644 /etc/nginx/nginx.conf
-sudo sed -i 's/old_text/new_text/' /etc/nginx/nginx.conf
-sudo sed -i 's/old_text/new_text/' /etc/nginx/sites-available/default
-sudo systemctl restart nginx
+sudo service nginx stop
+sudo service nginx start
+
+# Add any other necessary commands here

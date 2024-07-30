@@ -2,23 +2,35 @@
 import requests
 import sys
 
-if __name__ == "__main__":
-    employee_id = int(sys.argv[1])
+def main(employee_id):
+    """Fetch and display employee's TODO list progress."""
     base_url = 'https://jsonplaceholder.typicode.com/'
-
-    # Fetch user details
-    user = requests.get(base_url + 'users/' + str(employee_id)).json()
+    
+    # Get employee details
+    user_response = requests.get(f"{base_url}users/{employee_id}")
+    user = user_response.json()
     employee_name = user.get('name')
 
-    # Fetch todo list for the user
-    todos = requests.get(base_url + 'todos', params={'userId': employee_id}).json()
+    # Get TODO list
+    todos_response = requests.get(f"{base_url}todos", params={'userId': employee_id})
+    todos = todos_response.json()
 
-    # Extract completed tasks and count them
+    # Calculate task progress
     completed_tasks = [task for task in todos if task.get('completed')]
     number_of_done_tasks = len(completed_tasks)
     total_number_of_tasks = len(todos)
 
-    # Display the progress
+    # Print the result in the specified format
     print(f"Employee {employee_name} is done with tasks({number_of_done_tasks}/{total_number_of_tasks}):")
     for task in completed_tasks:
         print("\t " + task.get('title'))
+
+if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        print("Usage: ./0-gather_data_from_an_API.py <employee_id>")
+    else:
+        try:
+            employee_id = int(sys.argv[1])
+            main(employee_id)
+        except ValueError:
+            print("Employee ID must be an integer.")

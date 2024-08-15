@@ -1,22 +1,21 @@
 #!/usr/bin/python3
-"""Script to obtain subscribers count from a subreddit"""
-from requests import get
+"""Function to query subscribers on a given Reddit subreddit."""
+import requests
 
 
 def number_of_subscribers(subreddit):
-    """Function to get subscriber count"""
-    if not subreddit or type(subreddit) is not str:
-        return 0
-
-    url = 'https://www.reddit.com/r/{}/about.json'.format(subreddit)
-    headers = {'User-Agent': 'my-alx-app/0.0.1 (contact: myemail@example.com)'}
-    
+    """Return the total number of subscribers on a given subreddit."""
     try:
-        req = get(url, headers=headers, allow_redirects=False)
-        if req.status_code == 200:
-            data = req.json()
-            return data.get('data', {}).get('subscribers', 0)
-    except Exception:
-        pass
-    
-    return 0
+        url = "https://www.reddit.com/r/{}/about.json".format(subreddit)
+        headers = {
+            "User-Agent": "linux:0x16.api.advanced:v1.0.0\
+            (by /u/Large_Alternative_30)"
+        }
+        response = requests.get(url, headers=headers, allow_redirects=False)
+        if response.status_code == 404:
+            return 0
+        results = response.json().get("data")
+        return results.get("subscribers")
+    except (Exception):
+        print('Not Found')
+        return (0)

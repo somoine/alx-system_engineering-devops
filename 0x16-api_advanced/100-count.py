@@ -1,54 +1,46 @@
 #!/usr/bin/python3
-""" raddit api"""
+""" Recursive API calls to Redit
+    and count occurrences
+"""
+from requests import get
 
-import json
-import requests
 
+def count_words(subreddit, word_list, key_words={}, count={}, after=None):
+    """ get count of occurrence of words in word_list from
+        titles in hot articles in given subreddit
+    """
+    if not count:
+        key_words = {word.lower(): 0 for word in word_list}
+        word_list = [word.lower() for word in word_list]
+        count = {word.lower(): word_list.count(word.lower())
+                 for word in word_list}
 
-def count_words(subreddit, word_list, after="", count=[]):
-    """count all words"""
+    url = 'https://www.reddit.com/r/{}/hot.json'.format(subreddit)
+    params = {'after': after, 'limit': 100}
+    headers = {'user-agent': 'my-app/0.0.1'}
 
-    if after == "":
-        count = [0] * len(word_list)
+    req = get(url, params=params, headers=headers, allow_redirects=False)
+    #  get data if request was successful
+    if req.status_code == 200:
+        data = req.json().get('data')
+        after = data.get('after')
+        posts = data.get('children')
 
-    url = "https://www.reddit.com/r/{}/hot.json".format(subreddit)
-    request = requests.get(url,
-                           params={'after': after},
-                           allow_redirects=False,
-                           headers={'user-agent': 'bhalut'})
+        #  get count of key words in each title
+        for post in posts:
+            title = post.get('data').get('title').lower()
+            words = title.split()
+            for word in key_words.keys():
+                key_words[word] += words.count(word)
 
-    if request.status_code == 200:
-        data = request.json()
-
-        for topic in (data['data']['children']):
-            for word in topic['data']['title'].split():
-                for i in range(len(word_list)):
-                    if word_list[i].lower() == word.lower():
-                        count[i] += 1
-
-        after = data['data']['after']
-        if after is None:
-            save = []
-            for i in range(len(word_list)):
-                for j in range(i + 1, len(word_list)):
-                    if word_list[i].lower() == word_list[j].lower():
-                        save.append(j)
-                        count[i] += count[j]
-
-            for i in range(len(word_list)):
-                for j in range(i, len(word_list)):
-                    if (count[j] > count[i] or
-                            (word_list[i] > word_list[j] and
-                             count[j] == count[i])):
-                        aux = count[i]
-                        count[i] = count[j]
-                        count[j] = aux
-                        aux = word_list[i]
-                        word_list[i] = word_list[j]
-                        word_list[j] = aux
-
-            for i in range(len(word_list)):
-                if (count[i] > 0) and i not in save:
-                    print("{}: {}".format(word_list[i].lower(), count[i]))
+        #  call recursive function if there's more data
+        if after:
+            return count_words(subreddit, word_list, key_words, count, after)
         else:
-            count_words(subreddit, word_list, after, count)
+            for key in key_words.keys():
+                key_words[key] *= count[key]
+            key_words = sorted(key_words.items(),
+                               key=lambda item: (-item[1], item[0]))
+            for item in key_words:
+                if item[1] > 0:
+                    print("{}: {}".format(item[0], item[1]))
